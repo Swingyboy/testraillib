@@ -1,10 +1,17 @@
+from test import Test
+
 class Suite():
 	
-	def __init__(self, name: str, id: int, connect):
-		self.name = name
+	def __init__(self, project_id:int, name: str, id: int, connect):
 		self.id = id
+		self.name = name
+		self.project_id = project_id
 		self._connect = connect
+		self._cases_dict = self._get_cases_dict()
+		self._sections_dict = self._get_sections_dict()
 		self.info = self._get_suite_info()
+		self.cases = self._get_cases_list()
+		self.sections = self._get_sections_list()
 		
 	def _get_suite_info(self):
 		tmp_dict = {}
@@ -14,6 +21,34 @@ class Suite():
 			print (error)
 		
 		return tmp_dict
+		
+	def _get_cases_dict(self):
+		tmp_list = []
+		try:
+			tmp_list = self._connect.send_get('get_cases/' + str(self.project_id) + '&suite_id=' + str(self.id))
+		except APIError as error:
+			print (error)
+		tmp_cases_dict = dict([(item['title'], item['id']) for item in tmp_list])
+			
+		return tmp_cases_dict	
+		
+	def _get_cases_list(self):
+		cases_list = list([item for item in self._cases_dict])
+		return cases_list
+
+	def _get_sections_dict(self):
+		tmp_list = []
+		try:
+			tmp_list = self._connect.send_get('get_sections/' + str(self.project_id) + '&suite_id=' + str(self.id))
+		except APIError as error:
+			print (error)
+		tmp_sections_dict = dict([(item['name'], item['id']) for item in tmp_list])
+			
+		return tmp_sections_dict	
+		
+	def _get_sections_list(self):
+		cases_list = list([item for item in self._sections_dict])
+		return cases_list			
 		
 	def update(
 			self, suite_id: int,
@@ -46,6 +81,8 @@ class Run():
 		self.id = id
 		self._connect = connect
 		self.info = self._get_run_info()
+		self._tests_dict = self._get_tests_dict()
+		self.tests = self._get_tests_list()
 		
 	def _get_run_info(self):
 		tmp_dict = {}
@@ -55,6 +92,20 @@ class Run():
 			print (error)
 		
 		return tmp_dict
+		
+	def _get_tests_dict(self):
+		try:
+			tmp_list = self._connect.send_get('get_tests/' + str(self.id))
+		except APIError as error:
+			print (error)
+		tmp_tests_dict = dict([(item['title'], item['id']) for item in tmp_list])
+			
+		return tmp_tests_dict
+		
+	def _get_tests_list(self):
+		tests_list = list([item for item in self._tests_dict])
+		return tests_list	
+	
 			
 	def update(
 			self, suite_id: int,
@@ -83,4 +134,9 @@ class Run():
 		try:	
 			self._connect.send_post('close_run/' + str(self.id), {})
 		except APIError as error:
-			print (error)	
+			print (error)
+			
+	def get_test(self, name):
+		tmp_test = Test(name, self._tests_dict[name], self._connect)
+		return tmp_test
+			

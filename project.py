@@ -1,5 +1,5 @@
 from project_items import *
-
+from testrail import APIError
 
 class Project():
 	
@@ -7,48 +7,60 @@ class Project():
 		self.name = name
 		self.id = id
 		self._connect = connect
-		self.info = self._get_project_info()
+		self._plans_dict = self._get_plans_dict()
 		self._runs_dict = self._get_runs_dict()
 		self._suites_dict = self._get_suites_dict()
+		self.info = self._get_project_info()
+		self.plans = self._get_plans_list()
 		self.runs = self._get_runs_list()
 		self.suites = self._get_suites_list()
 	
 	def _get_project_info(self):
-		tmp_dict = {}
 		try:
 			tmp_dict = self._connect.send_get('get_project/' + str(self.id))
 		except APIError as error:
 			print (error)
 		
 		return tmp_dict
+		
+	def _get_plans_dict(self):
+		try:
+			tmp_list = self._connect.send_get('get_plans/' + str(self.id))
+		except APIError as error:
+			print (error)
+		tmp_suites_dict = dict([(item['name'], item['id']) for item in tmp_list])
+			
+		return tmp_suites_dict
+
+	def _get_plans_list(self):
+		plans_list = list([item for item in self._plans_dict])
+		return plans_list			
 	
 	def _get_runs_dict(self):
-		tmp_list = []
 		try:
 			tmp_list = self._connect.send_get('get_runs/' + str(self.id))
 		except APIError as error:
 			print (error)
 		tmp_runs_dict = dict([(item['name'], item['id']) for item in tmp_list])
 			
-		return tmp_runs_dict	
-	
+		return tmp_runs_dict
+		
 	def _get_runs_list(self):
 		runs_list = list([item for item in self._runs_dict])
 		return runs_list
-		
+
 	def _get_suites_dict(self):
-		tmp_list = []
 		try:
 			tmp_list = self._connect.send_get('get_suites/' + str(self.id))
 		except APIError as error:
 			print (error)
 		tmp_suites_dict = dict([(item['name'], item['id']) for item in tmp_list])
 			
-		return tmp_suites_dict	
+		return tmp_suites_dict		
 	
 	def _get_suites_list(self):
 		suites_list = list([item for item in self._suites_dict])
-		return suites_list	
+		return suites_list
 
 	def update(
 			self, name: str,
@@ -103,7 +115,7 @@ class Project():
 			print (error)
 			
 	def get_suite(self, name):
-		tmp_suite = Run(name, self._suites_dict[name], self._connect)
+		tmp_suite = Suite(self.id, name, self._suites_dict[name], self._connect)
 		return tmp_suite
 		
 	def add_suite(self, name: str, description: str):
