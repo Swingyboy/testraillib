@@ -1,5 +1,5 @@
-from project_items import *
-from testrail import APIError
+from run import *
+from suite import *
 
 class Project():
 	
@@ -61,6 +61,19 @@ class Project():
 	def _get_suites_list(self):
 		suites_list = list([item for item in self._suites_dict])
 		return suites_list
+		
+	def _get_sections_dict(self, suite):
+		tmp_list = []
+		try:
+			tmp_list = self._connect.send_get('get_sections/' + str(self.id) + '&suite_id=' + str(suite.id))
+		except APIError as error:
+			print (error)
+		return dict([(item['name'], item['id']) for item in tmp_list])
+		
+	def get_sections_list(self, suite):
+		self._sections_dict = self._get_sections_dict(suite)
+		sections_list = list([item for item in self._sections_dict])
+		return sections_list
 
 	def update(
 			self, name: str,
@@ -115,7 +128,7 @@ class Project():
 			print (error)
 			
 	def get_suite(self, name):
-		tmp_suite = Suite(self.id, name, self._suites_dict[name], self._connect)
+		tmp_suite = Suite(name, self._suites_dict[name], self._connect)
 		return tmp_suite
 		
 	def add_suite(self, name: str, description: str):
@@ -128,5 +141,30 @@ class Project():
 	def delete_suite(self, name:str):
 		try:	
 			self._connect.send_post('delete_suite/' + str(self._suites_dict[name]), {})
+		except APIError as error:
+			print (error)
+			
+	def get_section(self, name):
+		tmp_section = Section(name, self._sections_dict[name], self._connect)
+		return tmp_section
+
+	def add_section(
+			self, name: str,
+			description: str,
+			parent_id: int):
+			
+		properties_dict = {
+			'name':name,
+			'description':description,
+			'parent_id': parent_id
+			}
+		try:	
+			self._connect.send_post('add_section/' + str(self.Id), properties_dict)
+		except APIError as error:
+			print (error)		
+
+	def delete_section(self, name):
+		try:	
+			self._connect.send_post('delete_section/' + str(self._sections_dict[name]), {})
 		except APIError as error:
 			print (error)

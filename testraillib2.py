@@ -65,7 +65,7 @@ class Client():
 if __name__ == '__main__':
 	client = Client('https://ams.testrail.com','SBE@apipro.com', 'Zergswarm20' )
 	project = client.get_project('API PRO 10')
-	print(project.suites[0])
-	suite = project.get_suite(project.suites[0])
-	print(suite.sections)
-	
+	print(project.suites[1])
+	suite = project.get_suite(project.suites[5])
+	print(suite.id)
+	print(project.get_sections_list(suite))
