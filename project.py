@@ -1,5 +1,6 @@
 from run import *
 from suite import *
+from milestone import *
 
 class Project():
 	
@@ -7,13 +8,28 @@ class Project():
 		self.name = name
 		self.id = id
 		self._connect = connect
+		self._milestones_dict = self._get_milestones_dict()
 		self._plans_dict = self._get_plans_dict()
 		self._runs_dict = self._get_runs_dict()
 		self._suites_dict = self._get_suites_dict()
 		self.info = self._get_project_info()
+		self.milestones = self._get_milestones_list()
 		self.plans = self._get_plans_list()
 		self.runs = self._get_runs_list()
 		self.suites = self._get_suites_list()
+	
+	def _get_milestones_dict(self):
+		try:
+			tmp_list = self._connect.send_get('get_milestones/' + str(self.id))
+		except APIError as error:
+			print (error)
+		tmp_milestones_dict = dict([(item['name'], item['id']) for item in tmp_list])
+		
+		return tmp_milestones_dict
+		
+	def _get_milestones_list(self):
+		milestones_list = list([item for item in self._milestones_dict])
+		return milestones_list	
 	
 	def _get_project_info(self):
 		try:
@@ -91,6 +107,32 @@ class Project():
 			}
 		try:	
 			self._connect.send_post('update_project/' + str(self.id), properties_dict)
+		except APIError as error:
+			print (error)	
+			
+	def get_milestone(self, name):
+		tmp_milestone = Milestone(name, self._milestones_dict[name], self._connect)
+		return tmp_milestone
+		
+	def add_milestone(
+			self, 
+			name: str,
+			description: str,
+			due_on: str,
+			parent_id: int,
+			start_on: str
+			):
+			
+		properties_dict = {
+			'name':name,
+			'description':description,
+			'due_on':due_on,
+			'parent_id':parent_id,
+			'start_on':start_on,
+			'case_ids':case_ids
+			}
+		try:	
+			self._connect.send_post('add_run/' + str(self.Id), properties_dict)
 		except APIError as error:
 			print (error)	
 		

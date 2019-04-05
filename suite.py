@@ -25,7 +25,8 @@ class Case():
 			priority_id: int,
 			estimate: str,
 			milestone_id: int,
-			refs: str):
+			refs: str
+			):
 		
 		properties_dict = {
 			'title':title,
@@ -41,6 +42,7 @@ class Case():
 			self._connect.send_post('update_case/' + str(self.id), properties_dict)
 		except APIError as error:
 			print (error)
+
 
 
 class Section():
@@ -63,7 +65,8 @@ class Section():
 	def update(
 			self,
 			descr: str,
-			name: str):
+			name: str
+			):
 		
 		properties_dict = {
 			'description':descr,
@@ -114,7 +117,8 @@ class Suite():
 			milestone_id: int,
 			assignedto_id: int,
 			include_all: bool,
-			case_ids: list):
+			case_ids: list
+			):
 				
 		properties_dict = {
 			'suite_id':suite_id,

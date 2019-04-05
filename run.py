@@ -1,4 +1,5 @@
 from testrail import APIError
+from suite import Case, Suite
 
 
 class Test():
@@ -17,6 +18,15 @@ class Test():
 			print (error)
 		
 		return tmp_dict
+		
+	def get_results(self):
+		temp_results_list = []
+		try:
+			temp_results_list = self._connect.send_get('get_results/' + str(self.id))
+		except APIError as error:
+			print (error)
+			
+		return temp_results_list
 		
 class Run():
 	
@@ -58,7 +68,8 @@ class Run():
 			milestone_id: int,
 			assignedto_id: int,
 			include_all: bool,
-			case_ids: list):
+			case_ids: list
+			):
 				
 		properties_dict = {
 			'suite_id':suite_id,
@@ -83,4 +94,15 @@ class Run():
 	def get_test(self, name):
 		tmp_test = Test(name, self._tests_dict[name], self._connect)
 		return tmp_test
+		
+	"""def get_results(self, case_name):
+		suite = Suite(id = self.info['suite_id'])
+		case = suite.get_case(case_name)
+		temp_results_list = []
+		try:
+			temp_results_list = self._connect.send_get('get_results_for_case/' + str(self.id) +'/' + str(case.id))
+		except APIError as error:
+			print (error)
+			
+		return temp_results_list"""
 			

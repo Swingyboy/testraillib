@@ -37,11 +37,69 @@ class Client():
 		
 		return tmp_projects_list
 		
+	def add_case_field(
+			self,
+			type: str,
+			name: str,
+			label: str,
+			description: str,
+			include_all: bool,
+			template_ids: list,
+			configs
+			):
+			
+		properties_dict = {
+			'type':type,
+			'name':name,
+			'label':label,
+			'description':description,
+			'include_all':include_all,
+			'template_ids':template_ids,
+			'configs':configs
+			}
+		try:
+			self._connect.send_get('add_case_field')
+		except APIError as error:
+			print (error)
+	
+	def get_case_fields(self):
+		temp_fields_list = []
+		try:
+			temp_fields_list = self._connect.send_get('get_case_fields')
+		except APIError as error:
+			print (error)
+			
+		return temp_fields_list
+		
+	def get_case_types(self):
+		temp_types_list = []
+		try:
+			temp_types_list = self._connect.send_get('get_case_types')
+		except APIError as error:
+			print (error)
+			
+		return temp_types_list
+		
+	def get_priorities(self):
+		temp_priorities_list = []
+		try:
+			temp_priorities_list = self._connect.send_get('get_priorities')
+		except APIError as error:
+			print (error)
+			
+		return temp_priorities_list
+		
 	def get_project(self, name):
 		project = Project(name, self._projects_dict[name], self._connect)
 		return project
 		
-	def add_project(self, name:str, announce:str='', showAnnounce:bool=True, suite_mode:int=1):
+	def add_project(
+			self,
+			name:str, announce:str='',
+			showAnnounce:bool=True,
+			suite_mode:int=1
+			):
+			
 		properties_dict = {'name':name,
 			'announcement':announce,
 			'show_announcement':showAnnounce,
@@ -65,7 +123,7 @@ class Client():
 if __name__ == '__main__':
 	client = Client('https://ams.testrail.com','SBE@apipro.com', 'Zergswarm20' )
 	project = client.get_project('API PRO 10')
-	print(project.suites[1])
-	suite = project.get_suite(project.suites[5])
-	print(suite.id)
-	print(project.get_sections_list(suite))
+	print(project.suites[3])
+	run = project.get_run(project.runs[3])
+	suite = project.get_suite(run.info['suite_id'])
+	print(suite.info)
