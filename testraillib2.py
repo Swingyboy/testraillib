@@ -125,5 +125,7 @@ if __name__ == '__main__':
 	project = client.get_project('API PRO 10')
 	print(project.suites[3])
 	run = project.get_run(project.runs[3])
-	suite = project.get_suite(run.info['suite_id'])
-	print(suite.info)
+	print(run.info['suite_id'])
+	for key, value in project._suites_dict.items():
+		print( key, '=>', value)
+	#suite = project.get_suite(project._suites_dict[run.info['suite_id']])

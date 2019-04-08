@@ -95,14 +95,12 @@ class Run():
 		tmp_test = Test(name, self._tests_dict[name], self._connect)
 		return tmp_test
 		
-	"""def get_results(self, case_name):
-		suite = Suite(id = self.info['suite_id'])
-		case = suite.get_case(case_name)
+	def get_results(self, case_id):
 		temp_results_list = []
 		try:
-			temp_results_list = self._connect.send_get('get_results_for_case/' + str(self.id) +'/' + str(case.id))
+			temp_results_list = self._connect.send_get('get_results_for_case/' + str(self.info['suite_id']) +'/' + str(case_id))
 		except APIError as error:
 			print (error)
 			
-		return temp_results_list"""
+		return temp_results_list
 			
