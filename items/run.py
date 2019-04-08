@@ -1,11 +1,10 @@
 from testrail import APIError
-from suite import Case, Suite
+from items.suite import Suite
 
 
 class Test():
 
-	def __init__(self, name: str, id: int, connect):
-		self.name = name
+	def __init__(self, id: int, connect):
 		self.id = id
 		self._connect = connect
 		self.info = self._get_run_info()
@@ -19,6 +18,30 @@ class Test():
 		
 		return tmp_dict
 		
+	def add_result(self,
+			status_id: int,
+			comment: str,
+			version: str,
+			elapsed: str,
+			defects: str,
+			assignedto_id: int
+			):
+				
+		properties_dict = {
+			'status_id':status_id,
+			'comment':comment,
+			'version':version,
+			'elapsed':elapsed,
+			'defects':defects,
+			'assignedto_id':assignedto_id
+			}
+			
+		try:	
+			self._connect.send_post('add_result/' + str(self.id), properties_dict)
+		except APIError as error:
+			print (error)
+		
+		
 	def get_results(self):
 		temp_results_list = []
 		try:
@@ -30,8 +53,7 @@ class Test():
 		
 class Run():
 	
-	def __init__(self, name: str, id: int, connect):
-		self.name = name
+	def __init__(self, id: int, connect):
 		self.id = id
 		self._connect = connect
 		self.info = self._get_run_info()
@@ -91,16 +113,66 @@ class Run():
 		except APIError as error:
 			print (error)
 			
+	def get_suite(self):
+		return Suite(self.info['suite_id'], self._connect)
+			
 	def get_test(self, name):
-		tmp_test = Test(name, self._tests_dict[name], self._connect)
+		tmp_test = Test(self._tests_dict[name], self._connect)
 		return tmp_test
 		
-	def get_results(self, case_id):
+	def add_result_for_case(self,
+			case_id,
+			status_id: int,
+			comment: str,
+			version: str,
+			elapsed: str,
+			defects: str,
+			assignedto_id: int
+			):
+				
+		properties_dict = {
+			'status_id':status_id,
+			'comment':comment,
+			'version':version,
+			'elapsed':elapsed,
+			'defects':defects,
+			'assignedto_id':assignedto_id
+			}
+			
+		try:	
+			self._connect.send_post('add_result_for_case/' + str(self.id) +'/' + str(case_id), properties_dict)
+		except APIError as error:
+			print (error)
+			
+	def add_results_for_tests(self, results_list:list):
+		try:	
+			self._connect.send_post('add_results/' + str(self.id), results_list)
+		except APIError as error:
+			print (error)
+			
+	def add_results_for_cases(self, results_list:list):
+		try:	
+			self._connect.send_post('add_results/' + str(self.id), results_list)
+		except APIError as error:
+			print (error)
+
+	def get_results(self):
 		temp_results_list = []
 		try:
-			temp_results_list = self._connect.send_get('get_results_for_case/' + str(self.info['suite_id']) +'/' + str(case_id))
+			temp_results_list = self._connect.send_get('get_results_for_run/' + str(self.id))
 		except APIError as error:
 			print (error)
 			
 		return temp_results_list
+		
+	def get_results_for_case(self, case_id):
+		temp_results_list = []
+		try:
+			temp_results_list = self._connect.send_get('get_results_for_case/' + str(self.id) +'/' + str(case_id))
+		except APIError as error:
+			print (error)
+			
+		return temp_results_list
+		
+
 			

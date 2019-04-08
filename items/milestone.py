@@ -1,7 +1,9 @@
+from testrail import APIError
+
+
 class Milestone():
-	def __init__(self, name: str, id: int, connect):
+	def __init__(self, id: int, connect):
 		self.id = id
-		self.name = name
 		self._connect = connect
 		self.info = self._get_milestone_info()
 		

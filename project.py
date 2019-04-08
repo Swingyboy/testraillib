@@ -1,11 +1,11 @@
-from run import *
-from suite import *
-from milestone import *
+from items.run import Run
+from items.suite import Suite
+from items.milestone import Milestone
+
 
 class Project():
 	
-	def __init__(self, name, id, connect):
-		self.name = name
+	def __init__(self, id, connect):
 		self.id = id
 		self._connect = connect
 		self._milestones_dict = self._get_milestones_dict()
@@ -84,6 +84,7 @@ class Project():
 			tmp_list = self._connect.send_get('get_sections/' + str(self.id) + '&suite_id=' + str(suite.id))
 		except APIError as error:
 			print (error)
+		
 		return dict([(item['name'], item['id']) for item in tmp_list])
 		
 	def get_sections_list(self, suite):
@@ -111,7 +112,7 @@ class Project():
 			print (error)	
 			
 	def get_milestone(self, name):
-		tmp_milestone = Milestone(name, self._milestones_dict[name], self._connect)
+		tmp_milestone = Milestone(self._milestones_dict[name], self._connect)
 		return tmp_milestone
 		
 	def add_milestone(
@@ -132,12 +133,12 @@ class Project():
 			'case_ids':case_ids
 			}
 		try:	
-			self._connect.send_post('add_run/' + str(self.Id), properties_dict)
+			self._connect.send_post('add_milestone/' + str(self.Id), properties_dict)
 		except APIError as error:
 			print (error)	
 		
 	def get_run(self, name):
-		tmp_run = Run(name, self._runs_dict[name], self._connect)
+		tmp_run = Run(self._runs_dict[name], self._connect)
 		return tmp_run
 	
 	def add_run(
@@ -170,7 +171,12 @@ class Project():
 			print (error)
 			
 	def get_suite(self, name):
-		tmp_suite = Suite(name, self._suites_dict[name], self._connect)
+		if isinstance(name, str):
+			id = self._suites_dict[name]
+		if isinstance(name, int):
+			id = name
+		
+		tmp_suite = Suite(id, self._connect)
 		return tmp_suite
 		
 	def add_suite(self, name: str, description: str):
@@ -187,7 +193,7 @@ class Project():
 			print (error)
 			
 	def get_section(self, name):
-		tmp_section = Section(name, self._sections_dict[name], self._connect)
+		tmp_section = Section(self._sections_dict[name], self._connect)
 		return tmp_section
 
 	def add_section(
@@ -210,3 +216,12 @@ class Project():
 			self._connect.send_post('delete_section/' + str(self._sections_dict[name]), {})
 		except APIError as error:
 			print (error)
+			
+	def get_templates(self):
+		template_list = []
+		try:
+			template_list = self._connect.send_get('get_templates/' + str(self.id))
+		except APIError as error:
+			print (error)
+				
+		return template_list

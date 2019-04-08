@@ -3,9 +3,8 @@ from testrail import APIError
 
 class Case():
 	
-	def __init__(self, name: str, id: int, connect):
+	def __init__(self, id: int, connect):
 		self.id = id
-		self.name = name
 		self._connect = connect
 		self.info = self._get_case_info()
 		
@@ -47,9 +46,8 @@ class Case():
 
 class Section():
 	
-	def __init__(self, name: str, id: int, connect):
+	def __init__(self, id: int, connect):
 		self.id = id
-		self.name = name
 		self._connect = connect
 		self.info = self._get_case_info()
 		
@@ -79,9 +77,8 @@ class Section():
 			
 class Suite():
 	
-	def __init__(self, name: str, id: int, connect):
+	def __init__(self, id: int, connect):
 		self.id = id
-		self.name = name
 		self._connect = connect
 		self.info = self._get_suite_info()
 		self._cases_dict = self._get_cases_dict()
@@ -135,7 +132,7 @@ class Suite():
 			print (error)
 	
 	def get_case(self, name):
-		tmp_case = Case(name, self._cases_dict[name], self._connect)
+		tmp_case = Case(self._cases_dict[name], self._connect)
 		return tmp_case	
 
 	def delete_case(self, name):

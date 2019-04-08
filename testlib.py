@@ -1,6 +1,8 @@
 from testrail import *
 from project import Project
 
+
+
 		
 class Client():
 
@@ -90,7 +92,7 @@ class Client():
 		return temp_priorities_list
 		
 	def get_project(self, name):
-		project = Project(name, self._projects_dict[name], self._connect)
+		project = Project(self._projects_dict[name], self._connect)
 		return project
 		
 	def add_project(
@@ -116,16 +118,28 @@ class Client():
 		except APIError as error:
 			print (error)
 			
-
+	def get_result_fields(self):
+		temp_result_list = []
+		try:
+			temp_result_list = self._connect.send_get('get_result_fields')
+		except APIError as error:
+			print (error)
+		
+		return temp_result_list
 			
+
+	
 			
 			
 if __name__ == '__main__':
 	client = Client('https://ams.testrail.com','SBE@apipro.com', 'Zergswarm20' )
 	project = client.get_project('API PRO 10')
-	print(project.suites[3])
-	run = project.get_run(project.runs[3])
-	print(run.info['suite_id'])
-	for key, value in project._suites_dict.items():
-		print( key, '=>', value)
-	#suite = project.get_suite(project._suites_dict[run.info['suite_id']])
+	print(project.get_templates())
+	print(project.runs[2])
+	run = project.get_run(project.runs[2])
+	suite = run.get_suite()
+	print(suite.info)
+	case = suite.get_case(suite.cases[1])
+	print(case.id)
+	print(case.info)
+	print(run.get_results_for_case(case.id))
