@@ -1,7 +1,7 @@
 from testrail import APIError
 
 from items.run import Run
-from items.suite import Suite
+from items.suite import Section, Suite
 from items.milestone import Milestone
 
 
@@ -158,7 +158,7 @@ class Project():
 		runs_list = list([item for item in self.__runs_dict])			#iterate the __runs_dict and create the temporary list from the keys
 		return runs_list												#return the temporary list
 
-	def _get_sections_dict(self, suite):
+	def __get_sections_dict(self, suite):
 		"""Private method that returns the dictionary of the "Section_name":"Section_id" pairs
 		or prints the error message if the APIClient object doesn't return the "200 OK" code.
 		The method takes next arguments:
@@ -349,8 +349,8 @@ class Project():
 	def get_sections_list(self, suite):
 		"""Public method that takes a name of the suite as STRING and returns the list of the sections that are connected to the project instance."""
 		
-		self._sections_dict = self._get_sections_dict(suite)					#set the ._sections_dict attribute by calling the _get_sections_dict() method
-		sections_list = list([item for item in self._sections_dict])			#iterate throught the ._sections_dict attribute and create the list from the keys
+		self.__sections_dict = self.__get_sections_dict(suite)					#set the ._sections_dict attribute by calling the __get_sections_dict() method
+		sections_list = list([item for item in self.__sections_dict])			#iterate throught the .__sections_dict attribute and create the list from the keys
 		return sections_list													#return sections list
 		
 	def get_run(self, name):
@@ -362,7 +362,7 @@ class Project():
 	def get_section(self, name):
 		"""Public method that takes the name of the section as STRING and returns the Section object."""
 	
-		tmp_section = Section(self._sections_dict[name], self.__connect)		#find the section ID throught the name and call the Section class
+		tmp_section = Section(self.__sections_dict[name], self.__connect)		#find the section ID throught the name and call the Section class
 		return tmp_section													#return the instance
 
 	def get_suite(self, name):
