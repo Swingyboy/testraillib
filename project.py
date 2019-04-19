@@ -81,7 +81,6 @@ class Project():
 	
 	def __init__(self, id, connect):
 		"""The class constructor accepts the ID of the project and APIClient object as connect instance"""
-		
 		self.id = id													#set the id attribute
 		self.__connect = connect											#set the connect attribute 
 		self.__milestones_dict = self.__get__milestones_dict()				#set the __milestones_dict attribute by calling the __get__milestones_dict() method
@@ -102,9 +101,7 @@ class Project():
 			tmp_list = self.__connect.send_get('get_milestones/' + str(self.id))				#by sending "GET" request "get_milestones" to the TestRail API
 		except APIError as error:															#except the case when method doesn't return "200 OK" response
 			print (error)																	#print the response code in this case
-		
-		tmp_milestones_dict = dict([(item['name'], item['id']) for item in tmp_list])		#create the temporary dictionary of the "Milestone_name":"Milestone_id" pairs
-		return tmp_milestones_dict															#return the temporary dictionary
+		return dict([(item['name'], item['id']) for item in tmp_list])		#create the temporary dictionary of the "Milestone_name":"Milestone_id" pairs and return the temporary dictionary
 		
 	def __get_milestones_list(self):
 		"""Private method that returns the list of the milestones names these are contained in the project instance."""
@@ -116,47 +113,40 @@ class Project():
 		"""Private method that returns the dictionary of the "Plan_name":"Plan_id" pairs 
 		or prints the error message if the APIClient object doesn't return the "200 OK" code.
 		"""
+		tmp_list = []																#create the temporaty list	
 		try:																		#try to get the list of project plans with its attributes
 			tmp_list = self.__connect.send_get('get_plans/' + str(self.id))			#by sending "GET" request "get_plans" to the TestRail API
 		except APIError as error:													#except the case when method doesn't return "200 OK" response
 			print (error)															#print the response code in this case
-		
-		tmp__suites_dict = dict([(item['name'], item['id']) for item in tmp_list])	#create the temporary dictionary of the "Plan_name":"Plan_id" pairs
-		return tmp__suites_dict														#return the temporary dictionary
+		return dict([(item['name'], item['id']) for item in tmp_list])				#create the temporary dictionary of the "Plan_name":"Plan_id" pairs and return the temporary dictionary
 
 	def __get_plans_list(self):
 		"""Private method that returns the list of the plans names these are contained in the project instance."""
-		
-		plans_list = list([item for item in self.__plans_dict])				#iterate the __plans_dict and create the temporary list from the keys
-		return plans_list													#return the temporary list
+		return list([item for item in self.__plans_dict])				#iterate the __plans_dict and create the temporary list from the keys and return the temporary list
 		
 	def __get_project_info(self):
 		"""Private method that returns dictionary with the properties of the project instance."""
-		
+		tmp_dict ={}															#create the temporaty dict	
 		try:																	#try to get the list of project attributes
 			tmp_dict = self.__connect.send_get('get_project/' + str(self.id))	#by sending "GET" request "get_project" to the TestRail API
 		except APIError as error:												#except the case when method doesn't return "200 OK" response
 			print (error)														#print the response code in this case
-		
 		return tmp_dict															#return the temporary dictionary
 	
 	def __get__runs_dict(self):
 		"""Private method that returns the dictionary of the "Run_name":"Run _id" pairs
 		or prints the error message if the APIClient object doesn't return the "200 OK" code.
 		"""
+		tmp_list = []														#create the temporaty list	
 		try:																#try to get the list of project runs with its attributes
 			tmp_list = self.__connect.send_get('get_runs/' + str(self.id))	#by sending "GET" request "get_runs" to the TestRail API
 		except APIError as error:											#except the case when method doesn't return "200 OK" response
 			print (error)													#print the response code in this case
-		
-		tmp_runs_dict = dict([(item['name'], item['id']) for item in tmp_list])	#create the temporary dictionary of the "Run_name":"Run_id" pairs
-		return tmp_runs_dict													#return the temporary dictionary
+		return dict([(item['name'], item['id']) for item in tmp_list])	#create the temporary dictionary of the "Run_name":"Run_id" pairs and return the temporary dictionary
 		
 	def __get_runs_list(self):
 		"""Private method that returns the list of the runs names these are contained in the project instance."""
-		
-		runs_list = list([item for item in self.__runs_dict])			#iterate the __runs_dict and create the temporary list from the keys
-		return runs_list												#return the temporary list
+		return list([item for item in self.__runs_dict])			#iterate the __runs_dict and create the temporary list from the keys and return the temporary list
 
 	def __get_sections_dict(self, suite):
 		"""Private method that returns the dictionary of the "Section_name":"Section_id" pairs
@@ -170,33 +160,28 @@ class Project():
 			tmp_list = self.__connect.send_get('get_sections/' + str(self.id) + '&suite_id=' + str(suite.id))	#by sending "GET" request "get_sections" to the TestRail API
 		except APIError as error:																				#except the case when method doesn't return "200 OK" response
 			print (error)																						#print the response code in this case
-		
 		return dict([(item['name'], item['id']) for item in tmp_list])											#iterate throught the tmp_list, create the dictionary of "Section_name":"Section_id" pairs and return it.	
 		
 	def __get__suites_dict(self):
 		"""Private method that returns the dictionary of the "Suite_name":"Suite _id" pairs
 		or prints the error message if the APIClient object doesn't return the "200 OK" code.
 		"""
-		
+		tmp_list = []																		#create the temporaty list	
 		try:																				#try to get the list of avialable suites
-			tmp_list = self.__connect.send_get('get_suites/' + str(self.id))					#by sending "GET" request "get_suites" to the TestRail API
+			tmp_list = self.__connect.send_get('get_suites/' + str(self.id))				#by sending "GET" request "get_suites" to the TestRail API
 		except APIError as error:															#except the case when method doesn't return "200 OK" response
 			print (error)																	#print the response code in this case
-		
 		return dict([(item['name'], item['id']) for item in tmp_list])						#iterate throught the tmp_list, create the dictionary of "Section_name":"Section_id" pairs and return it.
 	
 	def __get_suites_list(self):
-		"""Private method that returns the list of the suites names these are contained in the project instance."""
-		
-		suites_list = list([item for item in self.__suites_dict])	#iterate the __suites_dict and create the temporary list from the keys
-		return suites_list											#return the temporary list
+		"""Private method that returns the list of the suites names these are contained in the project instance."""	
+		return list([item for item in self.__suites_dict])	#iterate the __suites_dict and create the temporary list from the keys and return the temporary list
 		
 	def add_milestone(
 			self, 
 			name: str,
 			description: str,
 			due_on: str,
-			parent_id: int,
 			start_on: str
 			):
 		"""Public method that adds the Milestone to the project instance. The method takes next arguments:
@@ -207,19 +192,22 @@ class Project():
 			parent_id		-	The ID of the parent milestone					as	INTEGER
 			start_on		-	The scheduled start date of the milestone			as	STRING (should be TIMESTAMP)
 		"""
-			
 		properties_dict = {						#Fill the dictionary of new milestone attributes 
 			'name':name,
 			'description':description,
 			'due_on':due_on,
-			'parent_id':parent_id,
-			'start_on':start_on,
-			'case_ids':case_ids
+			'parent_id':None,
+			'start_on':start_on
 			}
-		try:																			#try to create a new milestone
-			self.__connect.send_post('add_milestone/' + str(self.Id), properties_dict)	#by sending "POST" request "add_milestone" to the TestRail API
+		try:																						#try to create a new milestone
+			response = self.__connect.send_post('add_milestone/' + str(self.id), properties_dict)	#by sending "POST" request "add_milestone" to the TestRail API
+			self.__milestones_dict.update({response['name']:response['id']})
+			self.milestones.append(response['name'])
+			print('Milestone ' + name +' was added!')
+			return Milestone(response['id'], self.__connect)
 		except APIError as error:														#except the case when method doesn't return "200 OK" response
 			print (error)																#print the response code in this case
+			return None
 
 	def add_run(
 			self, 
@@ -250,10 +238,15 @@ class Project():
 			'include_all':include_all,
 			'case_ids':case_ids
 			}
-		try:																		#try to create a new run 
-			self.__connect.send_post('add_run/' + str(self.Id), properties_dict)		#by sending "POST" request "add_run" to the TestRail API
+		try:																					#try to create a new run 
+			response = self.__connect.send_post('add_run/' + str(self.id), properties_dict)		#by sending "POST" request "add_run" to the TestRail API
+			self.__runs_dict.update({response['name']:response['id']})
+			self.runs.append(response['name'])
+			print('Run ' + name +' was added!')
+			return Run(response['id'], self.__connect)
 		except APIError as error:													#except the case when method doesn't return "200 OK" response
 			print (error)															#print the response code in this case
+			return None
 
 	def add_section(
 			self,
@@ -269,17 +262,21 @@ class Project():
 			parent_id		-		The ID of the parent section (to build section hierarchies)							as		INTEGER
 			suite_id		-		The ID of the test suite (ignored if the project is operating in single suite mode, required otherwise)		as		INTEGER
 		"""
-			
 		properties_dict = {					#Fill the dictionary of new section attributes 
 			'name':name,
 			'description':description,
 			'parent_id': parent_id,
 			'suite_id':suite_id
 			}
-		try:																			#try to create a new section 
-			self.__connect.send_post('add_section/' + str(self.Id), properties_dict)		#by sending "POST" request "add_section" to the TestRail API
+		try:																						#try to create a new section 
+			response = self.__connect.send_post('add_section/' + str(self.id), properties_dict)		#by sending "POST" request "add_section" to the TestRail API
+			self.__sections_dict.update({response['name']:response['id']})
+			self.sections.append(response['name'])
+			print('Section ' + name +' was added!')
+			return Section(response['id'], self.__connect)
 		except APIError as error:														#except the case when method doesn't return "200 OK" response
 			print (error)																#print the response code in this case
+			return None
 
 	def add_suite(self,
 			name: str,
@@ -289,92 +286,124 @@ class Project():
 		
 			name		-		The name of the test suite (required)		as	STRING
 			description	-		The description of the test suite		as	STRING
-		"""
-			
-		properties_dict = {'name':name, 'description':description}					#fill the dictionary of new suite attributes 
-		try:																		#try to create a new section 
-			self.__connect.send_post('add_suite/' + str(self.Id), properties_dict)	#by sending "POST" request "add_suite" to the TestRail API
+		"""	
+		properties_dict = {'name':name, 'description':description}								#fill the dictionary of new suite attributes 
+		try:																					#try to create a new section 
+			response = self.__connect.send_post('add_suite/' + str(self.id), properties_dict)	#by sending "POST" request "add_suite" to the TestRail API
+			self.__suites_dict.update({response['name']:response['id']})
+			self.suites.append(response['name'])
+			print('Suite ' + name +' was added!')
+			return Suite(response['id'], self.__connect)
 		except APIError as error:													#except the case when method doesn't return "200 OK" response
 			print (error)															#print the response code in this case
+			return None
 			
 	def delete_milestone(self, name:str):
 		"""Public method that deletes the Milestone from the project instance."""
-		
-		try:																					#try to delete a Milestone 	
+		try:																						#try to delete a Milestone 	
 			self.__connect.send_post('delete_milestone/' + str(self.__milestones_dict[name]), {})	#by sending "POST" request "delete_run" to the TestRail API
+			del self.__milestones_dict[name]
+			self.milestones.remove(name)
+			print('Milestone ' + name +' was deleted!')	
 		except APIError as error:																#except the case when method doesn't return "200 OK" response
 			print (error)																		#print the response code in this case
+		except KeyError:
+			print('There is no such milestone!')	
+		return None
 
 	def delete_run(self, name:str):
 		"""Public method that deletes the Run from the project instance."""
-		
-		try:																		#try to delete a run 	
+		try:																			#try to delete a run 	
 			self.__connect.send_post('delete_run/' + str(self.__runs_dict[name]), {})	#by sending "POST" request "delete_run" to the TestRail API
+			del self.__runs_dict[name]
+			self.runs.remove(name)
+			print('Run ' + name +' was deleted!')	
 		except APIError as error:													#except the case when method doesn't return "200 OK" response
 			print (error)															#print the response code in this case
+		except KeyError:
+			print('There is no such run!')	
+		return None
 
 	def delete_section(self, name):
 		"""Public method that deletes the Section from the project instance."""
-		
-		try:																				#try to delete a section
+		try:																					#try to delete a section
 			self.__connect.send_post('delete_section/' + str(self._sections_dict[name]), {})	#by sending "POST" request "delete_section" to the TestRail API
+			del self.__sections_dict[name]
+			self.sections.remove(name)
+			print('Section ' + name +' was deleted!')	
 		except APIError as error:															#except the case when method doesn't return "200 OK" response
 			print (error)																	#print the response code in this case
+		except KeyError:
+			print('There is no such section!')
 
 	def delete_suite(self, name:str):
 		"""Public method that deletes the Suite from the project instance."""
-		
-		try:																				#try to delete a suite
+		try:																					#try to delete a suite
 			self.__connect.send_post('delete_suite/' + str(self.__suites_dict[name]), {})		#by sending "POST" request "delete_suite" to the TestRail API
-		except APIError as error:															#except the case when method doesn't return "200 OK" response
-			print (error)																	#print the response code in this case
+			del self.__suites_dict[name]
+			self.suites.remove(name)
+			print('Suite ' + name +' was deleted!')
+		except APIError as error:																#except the case when method doesn't return "200 OK" response
+			print (error)																		#print the response code in this case
+		except KeyError:
+			print('There is no such suite!')		
+		return None
 
 	def get_templates(self):
 		"""Public method that returns the list of available templates for the project instance."""
-		
 		template_list = []																#create the temporaty list
 		try:																			#try to get the list of available templates
-			template_list = self.__connect.send_get('get_templates/' + str(self.id))		#by sending "GET" request "get_templates" to the TestRail API
+			template_list = self.__connect.send_get('get_templates/' + str(self.id))	#by sending "GET" request "get_templates" to the TestRail API
 		except APIError as error:														#except the case when method doesn't return "200 OK" response
-			print (error)																#print the response code in this case
-				
+			print (error)																#print the response code in this case	
 		return template_list															#return the temporary list
 
 	def get_milestone(self, name):
 		"""Public method that takes the name of the milestone as STRING and returns the Milestone object."""
-		
-		tmp_milestone = Milestone(self.__milestones_dict[name], self.__connect)		#find the milestone ID throught the name and call the Milestone class
-		return tmp_milestone														#return the instance
+		try:
+			return Milestone(self.__milestones_dict[name], self.__connect)		#find the milestone ID throught the name and return the Milestone instance
+		except KeyError:
+			print('There is no such milestone!')
+			return None
 		
 	def get_sections_list(self, suite):
-		"""Public method that takes a name of the suite as STRING and returns the list of the sections that are connected to the project instance."""
-		
-		self.__sections_dict = self.__get_sections_dict(suite)					#set the ._sections_dict attribute by calling the __get_sections_dict() method
-		sections_list = list([item for item in self.__sections_dict])			#iterate throught the .__sections_dict attribute and create the list from the keys
+		"""Public method that takes a name of the suite as STRING and returns the list of the sections that are connected to the project instance."""	
+		self.__sections_dict = self.__get_sections_dict(suite)					#set the .__sections_dict attribute by calling the __get_sections_dict() method
+		sections_list = list(item for item in self.__sections_dict)				#iterate throught the .__sections_dict attribute and create the list from the keys
 		return sections_list													#return sections list
+			
 		
 	def get_run(self, name):
 		"""Public method that takes the name of the run as STRING and returns the Run object."""
-		
-		tmp_run = Run(self.__runs_dict[name], self.__connect)					#find the run ID throught the name and call the Run class
-		return tmp_run														#return the instance
+		try:
+			return Run(self.__runs_dict[name], self.__connect)					#find the run ID throught the name and return the Run instance
+		except KeyError:
+			print('There is no such section!')
+			return None
 		
 	def get_section(self, name):
 		"""Public method that takes the name of the section as STRING and returns the Section object."""
-	
-		tmp_section = Section(self.__sections_dict[name], self.__connect)		#find the section ID throught the name and call the Section class
-		return tmp_section													#return the instance
+		try:
+			return Section(self.__sections_dict[name], self.__connect)		#find the section ID throught the name and return the Section instance
+		except KeyError:
+			print('There is no such section!')
+			return None
 
 	def get_suite(self, name):
 		"""Public method that takes the name of the suite as STRING and returns the Suite object."""
-	
 		if isinstance(name, str):						#check the type of "name" variable
-			id = self.__suites_dict[name]				#if STRING then need to find the ID
+			try:
+				id = self.__suites_dict[name]				#if STRING then need to find the ID
+			except KeyError:
+				print('There is no such suite!')
+				return None
 		if isinstance(name, int):
 			id = name									#if INTEGER the name is id
-		
-		tmp_suite = Suite(id, self.__connect)			#find the section ID throught the name and call the Section class
-		return tmp_suite								#return the instance
+		try:
+			return Suite(id, self.__connect)			#find the section ID throught the name and return the Suite instance
+		except KeyError:
+			print('There is no such suite!')
+			return None
 
 	def update(
 			self, 
@@ -391,7 +420,6 @@ class Project():
 			is_completed		-		Specifies whether a project is considered completed or not		as		BOOLEAN
 			suite_mode		-		The suite mode of the project							as		INTEGER
 		"""
-		
 		properties_dict = {							#Fill the dictionary of new attributes for project 
 			'name':name,
 			'announcement':announce,
@@ -399,7 +427,10 @@ class Project():
 			'is_completed':is_completed,
 			'suite_mode':suite_mode
 			}
-		try:																			#try to update a project
-			self.__connect.send_post('update_project/' + str(self.id), properties_dict)	#by sending "POST" request "update_project" to the TestRail API
-		except APIError as error:														#except the case when method doesn't return "200 OK" response
-			print (error)																#print the response code in this case
+		try:																						#try to update a project
+			response = self.__connect.send_post('update_project/' + str(self.id), properties_dict)	#by sending "POST" request "update_project" to the TestRail API
+			self.info = self.__get_project_info()
+			return response
+		except APIError as error:																	#except the case when method doesn't return "200 OK" response
+			print (error)																			#print the response code in this case
+			return None

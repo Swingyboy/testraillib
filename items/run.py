@@ -25,20 +25,17 @@ class Test():
 
 	def __init__(self, id: int, connect):
 		"""The class constructor accepts the ID of the test and APIClient object as connect instance"""
-		
 		self.id = id						#set the id attribute
 		self.__connect = connect				#set the connect attribute
 		self.info = self.__get_test_info()	#set the info attribute by calling the __get_test_info() method
 
 	def __get_test_info(self):
-		"""Private method that returns dictionary with the properties of the test instance."""
-		
+		"""Private method that returns dictionary with the properties of the test instance."""		
 		tmp_dict = {}														#create a temporary dict
 		try:																#try to get the list of test attributes
 			tmp_dict = self.__connect.send_get('get_test/' + str(self.id))	#by sending "GET" request "get_test" to the TestRail API
 		except APIError as error:											#except the case when method doesn't return "200 OK" response
 			print (error)													#print the response code in this case
-		
 		return tmp_dict														#return the temporary dictionary
 		
 	def add_result(self,
@@ -59,7 +56,6 @@ class Test():
 		defects		-	A comma-separated list of defects to link to the test result								as	STRING
 		assignedto_id	-	The ID of a user the test should be assigned to											as	INTEGER
 		"""
-				
 		properties_dict = {							#Fill the dictionary of result attributes 
 			'status_id':status_id,
 			'comment':comment,
@@ -69,21 +65,21 @@ class Test():
 			'assignedto_id':assignedto_id
 			}
 			
-		try:																		#try to add a result
-			self.__connect.send_post('add_result/' + str(self.id), properties_dict)	#by sending "POST" request "add_result" to the TestRail API
+		try:																					#try to add a result
+			response = self.__connect.send_post('add_result/' + str(self.id), properties_dict)	#by sending "POST" request "add_result" to the TestRail API
+			return response
 		except APIError as error:													#except the case when method doesn't return "200 OK" response
 			print (error)															#print the response code in this case
+			return None
 		
 		
 	def get_results(self):
 		"""Public method that return the results list of the tests instance."""
-		
 		temp_results_list = []															#create a temporary list
 		try:																			#try to get the results list
 			temp_results_list = self.__connect.send_get('get_results/' + str(self.id))	#by sending "GET" request "get_results" to the TestRail API
 		except APIError as error:														#except the case when method doesn't return "200 OK" response
-			print (error)																#print the response code in this case
-			
+			print (error)																#print the response code in this case	
 		return temp_results_list														#return the temporary list
 		
 class Run():
@@ -129,7 +125,6 @@ class Run():
 	
 	def __init__(self, id: int, connect):
 		"""The class constructor accepts the ID of the run and the connect instance."""
-		
 		self.id = id									#set the id attribute
 		self.__connect = connect						#set the connect attribute 
 		self.info = self.__get_run_info()				#set the info attribute by calling the __get_run_info() method
@@ -140,13 +135,11 @@ class Run():
 		"""Private method that returns dictionary with the properties of the run instance.
 		This method is used for initialisation the .info attribute.
 		"""
-		
 		tmp_dict = {}														#create a temporary dict
 		try:																#try to get the list of run attributes
 			tmp_dict = self.__connect.send_get('get_run/' + str(self.id))	#by sending "GET" request "get_run" to the TestRail API
 		except APIError as error:											#except the case when method doesn't return "200 OK" response
 			print (error)													#print the response code in this case
-		
 		return tmp_dict														#return the temporary dict
 		
 	def __get_tests_dict(self):
@@ -154,20 +147,18 @@ class Run():
 		or prints the error message if the APIClient object doesn't return the "200 OK" code.
 		The method is used for initialisation the .___tests_dict attribute.
 		"""
-		try:																		#try to get the list of tests with its attributes
-			tmp_list = self.__connect.send_get('get_tests/' + str(self.id))			#by sending "GET" request "get_tests" to the TestRail API
-		except APIError as error:													#except the case when method doesn't return "200 OK" response
-			print (error)															#print the response code in this case
-			
-		tmp__tests_dict = dict([(item['title'], item['id']) for item in tmp_list])	#create the temporary dictionary of the "Test_name":"Test_id" pairs
-		return tmp__tests_dict														#return the temporary dictionary
+		tmp_list = []
+		try:																	#try to get the list of tests with its attributes
+			tmp_list = self.__connect.send_get('get_tests/' + str(self.id))		#by sending "GET" request "get_tests" to the TestRail API
+		except APIError as error:												#except the case when method doesn't return "200 OK" response
+			print (error)														#print the response code in this case	
+		return dict([(item['title'], item['id']) for item in tmp_list])			#create the temporary dictionary of the "Test_name":"Test_id" pairs and return it
 		
 	def __get_tests_list(self):
 		"""Private method that returns the list of the test names these are contained in the run instance. 
 		This method is used for filling the .tests attribute.
 		"""
-		tests_list = list([item for item in self.__tests_dict])		#iterate the __tests_dict and create the temporary list from the keys
-		return tests_list											#return the temporary list
+		return list([item for item in self.__tests_dict])		#iterate the __tests_dict, create the temporary list from the keys and return it
 
 	def add_result_for_case(self,
 			case_id,
@@ -191,7 +182,6 @@ class Run():
 		defects			-	A comma-separated list of defects to link to the test result								as	STRING
 		assignedto_id		-	The ID of a user the test should be assigned to											as	INTEGER
 		"""
-		
 		properties_dict = {											#fill the dictionary of new suite attributes 
 			'status_id':status_id,
 			'comment':comment,
@@ -200,11 +190,12 @@ class Run():
 			'defects':defects,
 			'assignedto_id':assignedto_id
 			}
-			
-		try:																										#try to add a new result
-			self.__connect.send_post('add_result_for_case/' + str(self.id) +'/' + str(case_id), properties_dict)		#by sending "POST" request "add_result_for_case" to the TestRail API
+		try:																												#try to add a new result
+			response = self.__connect.send_post('add_result_for_case/' + str(self.id) +'/' + str(case_id), properties_dict)	#by sending "POST" request "add_result_for_case" to the TestRail API
+			return response
 		except APIError as error:																					#except the case when method doesn't return "200 OK" response
 			print (error)																							#print the response code in this case
+			return None
 		
 	def add_results_for_cases(self, results_list:list):
 		"""Public method that takes the list of the results and adds one or more new test results, comments or assigns one or more tests.
@@ -214,10 +205,12 @@ class Run():
 		
 		results_list - The list of the results in format [{result 1 atributes},{result 2 atributes},... ,{result n atributes}]
 		"""
-		try:																									#try to add the new results
-			self.__connect.send_post('add_results_for_cases/' + str(self.id), dict("results", results_list))		#by sending "POST" request "add_results_for_cases" to the TestRail API
+		try:																												#try to add the new results
+			response = self.__connect.send_post('add_results_for_cases/' + str(self.id), dict("results", results_list))		#by sending "POST" request "add_results_for_cases" to the TestRail API
+			return response
 		except APIError as error:																				#except the case when method doesn't return "200 OK" response
 			print (error)																						#print the response code in this case
+			return None
 			
 	def add_results_for_tests(self, results_list:list):
 		"""Public method that takes the list of the results and adds one or more new test results, comments or assigns one or more tests.
@@ -226,29 +219,30 @@ class Run():
 		
 		results_list - The list of the results in format [{result 1 atributes},{result 2 atributes},... ,{result n atributes}]	as	LIST
 		"""
-		try:																						#try to add the new results
-			self.__connect.send_post('add_results/' + str(self.id), dict("results", results_list))	#by sending "POST" request "add_results" to the TestRail API
+		try:																									#try to add the new results
+			reponse = self.__connect.send_post('add_results/' + str(self.id), dict("results", results_list))	#by sending "POST" request "add_results" to the TestRail API
+			return response
 		except APIError as error:																	#except the case when method doesn't return "200 OK" response
 			print (error)																			#print the response code in this case
+			return None
 		
 	def close_run(self):
 		"""Public method that closes a current run instance and archives its tests & results."""
-		
-		try:															#try to close a run
-			self.__connect.send_post('close_run/' + str(self.id), {})	#by sending "POST" request "close_run" to the TestRail API
+		try:																		#try to close a run
+			response = self.__connect.send_post('close_run/' + str(self.id), {})	#by sending "POST" request "close_run" to the TestRail API
+			return response
 		except APIError as error:										#except the case when method doesn't return "200 OK" response
 			print (error)												#print the response code in this case
+			return None
 			
 	def get_results(self):
 		"""Public method that returns a list of test results for a run instance."""
-		
-		temp_results_list = []																	#create a temporary list
-		try:																					#try to get a list of results
-			temp_results_list = self.__connect.send_get('get_results_for_run/' + str(self.id))	#by sending "GET" request "get_results_for_run" to the TestRail API
-		except APIError as error:																#except the case when method doesn't return "200 OK" response
-			print (error)																		#print the response code in this case
-			
-		return temp_results_list																#return the temporary list
+		try:																				#try to get a list of results
+			response = self.__connect.send_get('get_results_for_run/' + str(self.id))		#by sending "GET" request "get_results_for_run" to the TestRail API
+			return response
+		except APIError as error:														#except the case when method doesn't return "200 OK" response
+			print (error)																#print the response code in this case
+			return None
 		
 	def get_results_for_case(self, case_id):
 		"""Public method that returns a list of test results for a run instance and case combination.
@@ -256,26 +250,27 @@ class Run():
 		
 		case_id	-	ID of the case (the case must be a part of the suite of the current run)	as	INTEGER
 		"""
-		
 		temp_results_list = []																						#create a temporary list
 		try:																										#try to get a list of results
 			temp_results_list = self.__connect.send_get('get_results_for_case/' + str(self.id) +'/' + str(case_id))	#by sending "GET" request "get_results_for_run" to the TestRail API
 		except APIError as error:																					#except the case when method doesn't return "200 OK" response
 			print (error)																							#print the response code in this case
-			
 		return temp_results_list																					#return the temporary list
 			
 	def get_suite(self):
 		"""Public method that returns a Suite object that connected to current run."""
-		
-		return Suite(self.info['suite_id'], self.__connect)	#take suite ID from the .info atribute and create a Suite instance from it
+		return Suite(self.info['suite_id'], self.__connect)					#take suite ID from the .info atribute and create a Suite instance from it
 			
 	def get_test(self, name):
 		"""Public method that returns a Test object. The method takes next arguments:
 		
 		name	-	Name of the test	as	STRING
 		"""
-		return Test(self.__tests_dict[name], self.__connect) 
+		try:
+			return Test(self.__tests_dict[name], self.__connect) 
+		except KeyError:
+			print('There is no such test!')
+			return None
 
 	def update(
 			self,
@@ -296,8 +291,7 @@ class Run():
 		assignedto_id	-	The ID of the user the test run should be assigned to											as	INTEGER
 		include_all	-	Flag that is responded for including all test cases of the test suite								as	BOOLEAN
 		case_ids	-	An array of case IDs for the custom case selection											as	ARRAY
-		"""
-				
+		"""	
 		properties_dict = {												#Fill the dictionary of new run attributes
 			'suite_id':suite_id,
 			'name':new_name,
@@ -307,7 +301,10 @@ class Run():
 			'include_all':include_all,
 			'case_ids':case_ids
 			}
-		try:																		#try to update a run 
-			self.__connect.send_post('update_run/' + str(self.id), properties_dict)	#by sending "POST" request "update_run" to the TestRail API
+		try:																					#try to update a run 
+			response = self.__connect.send_post('update_run/' + str(self.id), properties_dict)	#by sending "POST" request "update_run" to the TestRail API
+			self.info = self.__get_run_info()
+			return response			
 		except APIError as error:													#except the case when method doesn't return "200 OK" response
 			print (error)															#print the response code in this case
+			return None

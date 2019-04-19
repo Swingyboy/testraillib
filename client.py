@@ -58,22 +58,21 @@ class Client():
 		return client											#return the APIClient instance
 	
 	def __get_projects_dict(self):
-		"""The method that returns the dictionary of the "Project_name":"Project_id" pairs."""
-		temp_projects_dict = {}										#set the temporary dictionary. This is necessary because if .send_get method doesn't return "200 OK" response the error happens
+		"""The method that returns the dictionary of the "Project_name":"Project_id" pairs."""									
+		projects_list = []											#set the temporary list. This is necessary because if .send_get method doesn't return "200 OK" response the error happens
 		try:														#try to get the list list of available projects with its attributes
 			projects_list = self.__connect.send_get('get_projects')	#by sending "GET" request "get_projects" to the TestRail API
 		except APIError as error:									#except the case when method doesn't return "200 OK" response
 			print (error)											#print the response code in this case
-		
+		temp_projects_dict = {}
 		for item in projects_list:									#iterate thru the list of vailable projects
 			temp_projects_dict.update({item['name']:item['id']})	#fill the temporary dictionary by the "Project_name":"Project_id" pairs 
-
 		return temp_projects_dict									#return the temporary dictionary
 	
 	def __get_projects(self):
 		"""The method that creates the list of project names form the .__projects_dict attribute."""
 		tmp_projects_list =[]											#create the temporaty list
-		for key in self.__projects_dict: tmp_projects_list.append(key)	#iterat the __projects_dict and append the keys from this dict to temporaty list
+		for key in self.__projects_dict: tmp_projects_list.append(key)	#iterate the __projects_dict and append the keys from this dict to temporary list
 		return tmp_projects_list										#return the temorary list
 	
 	def add_case_field(
@@ -96,7 +95,6 @@ class Client():
 			template_ids		-	The ID's of templates new custom field (is necessary if 'include_all' = FALSE)		as 	ARRAY 
 			configs			-	The object wrapped in an array with two default keys, 'context' and 'options'		as 	OBJECT	
 		"""
-			
 		properties_dict = {										#Fill the dictionary of new case field attributes 
 			'type':type,
 			'name':name,
@@ -106,10 +104,13 @@ class Client():
 			'template_ids':template_ids,
 			'configs':configs
 			}
-		try:																#try to create a new case field 
-			self.__connect.send_post('add_case_field', properties_dict)		#by sending a "POST" request "add_case_field" to the TestRail API with specified attributes
-		except APIError as error:											#except the case when method doesn't return "200 OK" response
-			print (error)													#print the response code in this case
+		try:																			#try to create a new case field 
+			response = self.__connect.send_post('add_case_field', properties_dict)		#by sending a "POST" request "add_case_field" to the TestRail API with specified attributes
+			print('Project ' + name +' was added!')
+			return response
+		except APIError as error:														#except the case when method doesn't return "200 OK" response
+			print (error)																#print the response code in this case
+			return None
 	
 	def get_case_fields(self):
 		"""The method that returns the list of test case custom fields"""
@@ -118,7 +119,6 @@ class Client():
 			temp_fields_list = self.__connect.send_get('get_case_fields')	#by sending "GET" request "get_case_fields" to the TestRail API
 		except APIError as error:											#except the case when method doesn't return "200 OK" response
 			print (error)													#print the response code in this case
-			
 		return temp_fields_list												#return the temporary list
 	
 	def get_case_types(self):
@@ -128,7 +128,6 @@ class Client():
 			temp_types_list = self.__connect.send_get('get_case_types')		#by sending "GET" request "get_case_types" to the TestRail API
 		except APIError as error:											#except the case when method doesn't return "200 OK" response
 			print (error)													#print the response code in this case
-			
 		return temp_types_list												#return the temporary list
 	
 	def get_priorities(self):
@@ -138,13 +137,15 @@ class Client():
 			temp_priorities_list = self.__connect.send_get('get_priorities')	#by sending "GET" request "get_priorities" to the TestRail API
 		except APIError as error:												#except the case when method doesn't return "200 OK" response
 			print (error)														#print the response code in this case
-			
 		return temp_priorities_list												#return the temporary list
 	
 	def get_project(self, name):
 		"""The method that takes the name of the project as STRING and returns the Project object"""
-		project = Project(self.__projects_dict[name], self.__connect)				#find the project ID throught the name and call the Project class
-		return project															#return the instance
+		try:															#find the project ID throught the name and call the Project class
+			return Project(self.__projects_dict[name], self.__connect)	#return the instance
+		except KeyError:
+			print('There is no such project!')
+			return None
 	
 	def add_project(
 			self,
@@ -166,11 +167,16 @@ class Client():
 			'show_announcement':showAnnounce,
 			'suite_mode':suite_mode
 			}
-		try:																#try to create a new project
-			self.__connect.send_post('add_project', properties_dict)		#by sending a "POST" request "add_project" to the TestRail API with specified attributes
+		try:																		#try to create a new project
+			response = self.__connect.send_post('add_project', properties_dict)		#by sending a "POST" request "add_project" to the TestRail API with specified attributes
+			self.__projects_dict.update({response['name']:response['id']})
+			self.projects.append(response['name'])
+			print('Project ' + name +' was added!')
+			return Project(response['id'], self.__connect)
 		except APIError as error:											#except the case when method doesn't return "200 OK" response
 			print (error)													#print the response code in this case
-
+			return None
+			
 	def delete_project(self, name):																
 		"""	The method that takes the name of the project as STRING and deletes the project to the TestRail.
 			
@@ -179,21 +185,20 @@ class Client():
 		"""
 		try:																					#try to delete a project
 			self.__connect.send_post('delete_project/' + str(self.__projects_dict[name]),{})	#by sending a "POST" request "delete_project" to the TestRail API with empty dict as attributes
+			del self.__projects_dict[name]
+			self.projects.remove(name)
+			print('Project' + name +' was deleted!')
 		except APIError as error:																#except the case when method doesn't return "200 OK" response
 			print (error)																		#print the response code in this case
-	
-	#method that returns the list of available test result custom fields	
+		except KeyError:
+			print('There is no such project!')
+		return None
+
 	def get_result_fields(self):
 		"""The method that returns the list of available test result custom fields."""
-		temp_result_list = []															#create the temporaty list
+		temp_result_list = None															#create the temporaty list
 		try:																			#try to get the list of available test result custom fields
 			temp_result_list = self.__connect.send_get('get_result_fields')				#by sending "GET" request "get_result_fields" to the TestRail API
 		except APIError as error:														#except the case when method doesn't return "200 OK" response
 			print (error)																#print the response code in this case
-		
 		return temp_result_list															#return the temporary list
-			
-
-	
-			
-			

@@ -23,20 +23,17 @@ class Case():
 	
 	def __init__(self, id: int, connect):
 		"""The class constructor accepts the ID of the case and APIClient object as connect instance."""
-		
 		self.id = id						#set the id attribute
 		self.__connect = connect				#set the connect attribute
 		self.info = self.__get_case_info()	#set the info attribute by calling the _get_case_info() method
 		
 	def __get_case_info(self):
 		"""Private method that returns dictionary with the properties of the case instance."""
-		
 		tmp_dict = {}														#create a temporary dict
 		try:																#try to get the list of case attributes
 			tmp_dict = self.__connect.send_get('get_case/' + str(self.id))	#by sending "GET" request "get_case" to the TestRail API
 		except APIError as error:											#except the case when method doesn't return "200 OK" response
 			print (error)													#print the response code in this case
-		
 		return tmp_dict														#return the temporary dictionary
 		
 	def update(
@@ -58,7 +55,6 @@ class Case():
 		milestone_id		-	The ID of the milestone to link to the test case	as	INTEGER
 		refs			-	A comma-separated list of references/requirements	as	STRING
 		"""
-		
 		properties_dict = {					#Fill the dictionary of new attributes for case 
 			'title':title,
 			'template_id':template_id,
@@ -69,10 +65,13 @@ class Case():
 			'milestone_id':milestone_id,
 			'refs':refs
 			}
-		try:																			#try to update a case
-			self.__connect.send_post('update_case/' + str(self.id), properties_dict)		#by sending "POST" request "update_case" to the TestRail API
+		try:																						#try to update a case
+			response = self.__connect.send_post('update_case/' + str(self.id), properties_dict)		#by sending "POST" request "update_case" to the TestRail API
+			self.info = self.__get_case_info()
+			return response
 		except APIError as error:														#except the case when method doesn't return "200 OK" response
 			print (error)																#print the response code in this case
+			return None
 
 
 
@@ -104,13 +103,11 @@ class Section():
 		
 	def __get_section_info(self):
 		"""Private method that returns dictionary with the properties of the section instance."""
-		
 		tmp_dict = {}															#create a temporary dict
 		try:																	#try to get the list of section attributes
 			tmp_dict = self.__connect.send_get('get_section/' + str(self.id))	#by sending "GET" request "get_section" to the TestRail API
 		except APIError as error:												#except the case when method doesn't return "200 OK" response
 			print (error)														#print the response code in this case
-		
 		return tmp_dict															#return the temporary dictionary
 		
 	def update(
@@ -122,15 +119,17 @@ class Section():
 		description		-	The description of the section		as	STRING
 		name			-	The name of the section			as	STRING
 		"""
-		
 		properties_dict = {							#Fill the dictionary of new attributes for section 
 			'description':descr,
 			'name':name
 			}
 		try:																				#try to update a section
-			self.__connect.send_post('update_section/' + str(self.id), properties_dict)		#by sending "POST" request "update_section" to the TestRail API
+			response = self.__connect.send_post('update_section/' + str(self.id), properties_dict)		#by sending "POST" request "update_section" to the TestRail API
+			self.info = self.__get_section_info()
+			return response
 		except APIError as error:															#except the case when method doesn't return "200 OK" response
 			print (error)																	#print the response code in this case
+			return None
 			
 class Suite():
 	"""The Section class that create Section instance.
@@ -165,7 +164,6 @@ class Suite():
 	
 	def __init__(self, id: int, connect):
 		"""The class constructor accepts the ID of the suite and APIClient object as connect instance."""
-	
 		self.id = id								#set the id attribute
 		self.__connect = connect						#set the connect attribute 
 		self.info = self.__get_suite_info()			#set the info attribute by calling the __get_suite_info() method
@@ -176,46 +174,46 @@ class Suite():
 		"""Private method that returns the dictionary of the "Case_name":"Case_id" pairs 
 		or prints the error message if the APIClient object doesn't return the "200 OK" code
 		"""
-	
 		tmp_list = []																										#create a temporary list
 		try:																												#try to get the list of suite cases with its attributes
 			tmp_list = self.__connect.send_get('get_cases/' + str(self.info['project_id']) + '&suite_id=' + str(self.id))	#by sending "GET" request "get_cases" to the TestRail API
 		except APIError as error:																							#except the case when method doesn't return "200 OK" response
 			print (error)																									#print the response code in this case
-		
-		tmp_cases_dict = dict([(item['title'], item['id']) for item in tmp_list])		#create the temporary dictionary of the "Case_name":"Case_id" pairs
-		return tmp_cases_dict															#return the temporary dictionary
+		return dict([(item['title'], item['id']) for item in tmp_list])		#create the temporary dictionary of the "Case_name":"Case_id" pairs and return it
 		
 	def _get_cases_list(self):
 		"""Private method that returns the list of the cases names these are contained in the suite instance."""
-		
-		cases_list = list([item for item in self._cases_dict])			#iterate the _cases_dict and create the temporary list from the keys
-		return cases_list												#return the temporary list
+		return list([item for item in self._cases_dict])			#iterate the _cases_dict, create and return the temporary list
 		
 	def __get_suite_info(self):
 		"""Private method that returns dictionary with the properties of the suite instance."""
-		
 		tmp_dict = {}															#create a temporary dict
 		try:																	#try to get the list of suite attributes
 			tmp_dict = self.__connect.send_get('get_suite/' + str(self.id))		#by sending "GET" request "get_suite" to the TestRail API
 		except APIError as error:												#except the case when method doesn't return "200 OK" response
 			print (error)														#print the response code in this case
-		
 		return tmp_dict															#return the temporary dict
-	
-	def get_case(self, name):
-		""""Public method that takes the name of the case as STRING and returns the Case object."""
-	
-		tmp_case = Case(self._cases_dict[name], self.__connect)		#find the case ID throught the name and call the Case class
-		return tmp_case												#return the instance
 
-	def delete_case(self, name):
+	def delete_case(self, name:str):
 		"""Public method that deletes the Case from the suite instance."""
-		
 		try:																			#try to delete a suite
 			self.__connect.send_post('delete_case/' + str(self._cases_dict[name]), {})	#by sending "POST" request "delete_case" to the TestRail API
+			del self._cases_dict[name]
+			self.cases.remove(name)
+			print('Case ' + name +' was deleted!')	
 		except APIError as error:														#except the case when method doesn't return "200 OK" response
 			print (error)																#print the response code in this case
+		except KeyError:
+			print('There is no such case!')		
+		return None
+		
+	def get_case(self, name):
+		""""Public method that takes the name of the case as STRING and returns the Case object."""
+		try:
+			return Case(self._cases_dict[name], self.__connect)		#find the case ID throught the name and return the Class instance
+		except KeyError:
+			print('There is no such case!')
+			return None
 			
 	def update(
 			self,
@@ -227,12 +225,14 @@ class Suite():
 		name		-		The name of the test suite (required)		as	STRING
 		description	-		The description of the test suite		as	STRING
 		"""
-				
 		properties_dict = {								#fill the dictionary of new suite attributes 
 			'name':new_name,
 			'description':description,
 			}
-		try:																			#try to create a new section
-			self.__connect.send_post('update_suite/' + str(self.id), properties_dict)	#by sending "POST" request "update_suite" to the TestRail API
+		try:																						#try to create a new section
+			response = self.__connect.send_post('update_suite/' + str(self.id), properties_dict)	#by sending "POST" request "update_suite" to the TestRail API
+			self.info = self.__get_suite_info()
+			return response	
 		except APIError as error:														#except the case when method doesn't return "200 OK" response
 			print (error)																#print the response code in this case
+			return None
